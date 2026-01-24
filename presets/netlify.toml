@@ -1,0 +1,19 @@
+name = "netlify"
+description = "Netlify hosting configuration"
+
+[[variables]]
+name = "site"
+description = "Netlify site name (e.g., my-site for my-site.netlify.app)"
+required = true
+
+[[records]]
+type = "A"
+host = "@"
+value = "75.2.60.5"
+ttl = 1800
+
+[[records]]
+type = "CNAME"
+host = "www"
+value = "{{site}}.netlify.app."
+ttl = 1800

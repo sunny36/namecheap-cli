@@ -1,0 +1,14 @@
+name = "vercel"
+description = "Vercel hosting configuration"
+
+[[records]]
+type = "A"
+host = "@"
+value = "76.76.21.21"
+ttl = 1800
+
+[[records]]
+type = "CNAME"
+host = "www"
+value = "cname.vercel-dns.com."
+ttl = 1800

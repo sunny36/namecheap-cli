@@ -1,0 +1,19 @@
+name = "cloudflare"
+description = "Cloudflare DNS proxy configuration"
+
+[[variables]]
+name = "ip"
+description = "Origin server IP address"
+required = true
+
+[[records]]
+type = "A"
+host = "@"
+value = "{{ip}}"
+ttl = 1
+
+[[records]]
+type = "A"
+host = "www"
+value = "{{ip}}"
+ttl = 1

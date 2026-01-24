@@ -1,0 +1,45 @@
+name = "fastmail"
+description = "Fastmail email configuration"
+
+[[records]]
+type = "MX"
+host = "@"
+value = "in1-smtp.messagingengine.com."
+ttl = 3600
+priority = 10
+
+[[records]]
+type = "MX"
+host = "@"
+value = "in2-smtp.messagingengine.com."
+ttl = 3600
+priority = 20
+
+[[records]]
+type = "TXT"
+host = "@"
+value = "v=spf1 include:spf.messagingengine.com ~all"
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "fm1._domainkey"
+value = "fm1.{{domain}}.dkim.fmhosted.com."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "fm2._domainkey"
+value = "fm2.{{domain}}.dkim.fmhosted.com."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "fm3._domainkey"
+value = "fm3.{{domain}}.dkim.fmhosted.com."
+ttl = 3600
+
+[[variables]]
+name = "domain"
+description = "Your domain name (without www)"
+required = true

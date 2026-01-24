@@ -1,0 +1,37 @@
+[package]
+name = "namecheap-cli"
+version = "1.0.0"
+edition = "2021"
+description = "A cross-platform CLI tool for managing Namecheap DNS records"
+license = "MIT"
+repository = "https://github.com/uradical/namecheap-cli"
+keywords = ["namecheap", "dns", "cli", "domains"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "namecheap"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+reqwest = { version = "0.12", features = ["rustls-tls"], default-features = false }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+quick-xml = { version = "0.37", features = ["serialize"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+directories = "6"
+hickory-resolver = "0.25"
+tabled = "0.18"
+console = "0.15"
+dialoguer = "0.11"
+indicatif = "0.17"
+thiserror = "2"
+rust-embed = "8"
+psl = "2"
+shellexpand = "3"
+clap_complete = "4"
+
+[dev-dependencies]
+wiremock = "0.6"
+tempfile = "3"

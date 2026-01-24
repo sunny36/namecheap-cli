@@ -1,0 +1,57 @@
+name = "protonmail"
+description = "ProtonMail email configuration"
+
+[[variables]]
+name = "verification"
+description = "ProtonMail domain verification code"
+required = true
+
+[[records]]
+type = "MX"
+host = "@"
+value = "mail.protonmail.ch."
+ttl = 3600
+priority = 10
+
+[[records]]
+type = "MX"
+host = "@"
+value = "mailsec.protonmail.ch."
+ttl = 3600
+priority = 20
+
+[[records]]
+type = "TXT"
+host = "@"
+value = "protonmail-verification={{verification}}"
+ttl = 3600
+
+[[records]]
+type = "TXT"
+host = "@"
+value = "v=spf1 include:_spf.protonmail.ch mx ~all"
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "protonmail._domainkey"
+value = "protonmail.domainkey.{{verification}}.domains.proton.ch."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "protonmail2._domainkey"
+value = "protonmail2.domainkey.{{verification}}.domains.proton.ch."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "protonmail3._domainkey"
+value = "protonmail3.domainkey.{{verification}}.domains.proton.ch."
+ttl = 3600
+
+[[records]]
+type = "TXT"
+host = "_dmarc"
+value = "v=DMARC1; p=quarantine"
+ttl = 3600

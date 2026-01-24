@@ -1,0 +1,43 @@
+name = "google-workspace"
+description = "Google Workspace email configuration"
+
+[[records]]
+type = "MX"
+host = "@"
+value = "aspmx.l.google.com."
+ttl = 3600
+priority = 1
+
+[[records]]
+type = "MX"
+host = "@"
+value = "alt1.aspmx.l.google.com."
+ttl = 3600
+priority = 5
+
+[[records]]
+type = "MX"
+host = "@"
+value = "alt2.aspmx.l.google.com."
+ttl = 3600
+priority = 5
+
+[[records]]
+type = "MX"
+host = "@"
+value = "alt3.aspmx.l.google.com."
+ttl = 3600
+priority = 10
+
+[[records]]
+type = "MX"
+host = "@"
+value = "alt4.aspmx.l.google.com."
+ttl = 3600
+priority = 10
+
+[[records]]
+type = "TXT"
+host = "@"
+value = "v=spf1 include:_spf.google.com ~all"
+ttl = 3600

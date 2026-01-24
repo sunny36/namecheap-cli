@@ -1,0 +1,31 @@
+name = "sendgrid"
+description = "SendGrid email sending configuration"
+
+[[variables]]
+name = "domain_id"
+description = "SendGrid domain ID for DKIM"
+required = true
+
+[[records]]
+type = "CNAME"
+host = "em{{domain_id}}"
+value = "u{{domain_id}}.wl.sendgrid.net."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "s1._domainkey"
+value = "s1.domainkey.u{{domain_id}}.wl.sendgrid.net."
+ttl = 3600
+
+[[records]]
+type = "CNAME"
+host = "s2._domainkey"
+value = "s2.domainkey.u{{domain_id}}.wl.sendgrid.net."
+ttl = 3600
+
+[[records]]
+type = "TXT"
+host = "@"
+value = "v=spf1 include:sendgrid.net ~all"
+ttl = 3600

@@ -1,0 +1,61 @@
+name = "github-pages"
+description = "GitHub Pages hosting configuration"
+
+[[variables]]
+name = "username"
+description = "GitHub username or organization"
+required = true
+
+[[records]]
+type = "A"
+host = "@"
+value = "185.199.108.153"
+ttl = 1800
+
+[[records]]
+type = "A"
+host = "@"
+value = "185.199.109.153"
+ttl = 1800
+
+[[records]]
+type = "A"
+host = "@"
+value = "185.199.110.153"
+ttl = 1800
+
+[[records]]
+type = "A"
+host = "@"
+value = "185.199.111.153"
+ttl = 1800
+
+[[records]]
+type = "AAAA"
+host = "@"
+value = "2606:50c0:8000::153"
+ttl = 1800
+
+[[records]]
+type = "AAAA"
+host = "@"
+value = "2606:50c0:8001::153"
+ttl = 1800
+
+[[records]]
+type = "AAAA"
+host = "@"
+value = "2606:50c0:8002::153"
+ttl = 1800
+
+[[records]]
+type = "AAAA"
+host = "@"
+value = "2606:50c0:8003::153"
+ttl = 1800
+
+[[records]]
+type = "CNAME"
+host = "www"
+value = "{{username}}.github.io."
+ttl = 1800
