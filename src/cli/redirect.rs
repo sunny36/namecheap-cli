@@ -155,7 +155,7 @@ async fn add(
     records.push(record);
 
     client
-        .set_hosts(domain, &records)
+        .set_hosts(domain, &records, false)
         .await
         .map_err(|e| CliError::Api(e.to_string()))?;
 
@@ -213,7 +213,7 @@ async fn rm(domain: &str, host: &str, config: &Config, global: &GlobalOpts) -> R
     }
 
     client
-        .set_hosts(domain, &records)
+        .set_hosts(domain, &records, false)
         .await
         .map_err(|e| CliError::Api(e.to_string()))?;
 

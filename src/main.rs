@@ -1,14 +1,7 @@
-mod api;
-mod cli;
-mod config;
-mod dns;
-mod error;
-mod output;
-mod preset;
-
 use clap::Parser;
-use cli::{Cli, Commands};
-use error::{Result, EXIT_SUCCESS};
+use namecheap_cli::cli::{self, Cli, Commands};
+use namecheap_cli::config;
+use namecheap_cli::error::{Result, EXIT_SUCCESS};
 
 #[tokio::main]
 async fn main() {

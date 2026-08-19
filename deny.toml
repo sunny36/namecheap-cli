@@ -2,6 +2,10 @@
 version = 2
 ignore = [
     "RUSTSEC-2025-0119", # number_prefix unmaintained (transitive dep of indicatif)
+    "RUSTSEC-2026-0173", # proc-macro-error2 unmaintained (transitive of clap/tabled)
+    # hickory-resolver 0.26 is a breaking API (ipv4_lookup/mx_lookup/etc removed).
+    "RUSTSEC-2026-0118", # hickory-proto 0.25 NSEC3 loop; no 0.25 patch
+    "RUSTSEC-2026-0119", # hickory-proto name-compression DoS; fixed in 0.26.1
 ]
 
 [licenses]

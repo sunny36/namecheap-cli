@@ -2,18 +2,24 @@
 
 A cross-platform CLI tool for managing Namecheap DNS records.
 
+This repository is a fork of [uRadical/namecheap-cli](https://github.com/uRadical/namecheap-cli). The MIT license is retained.
+
 ## Installation
 
-### From source
+This fork is **not** published on crates.io. The `namecheap-cli` crate name there is upstream 1.0.0 and `cargo install namecheap-cli` will **not** install this fork.
+
+Install from this repository:
 
 ```bash
+git clone https://github.com/sunny36/namecheap-cli
+cd namecheap-cli
 cargo install --path .
 ```
 
-### From crates.io
+Or from a local checkout:
 
 ```bash
-cargo install namecheap-cli
+cargo install --path .
 ```
 
 ## Configuration
@@ -90,7 +96,8 @@ namecheap dns list example.com
 # Filter by type
 namecheap dns list example.com -t A
 
-# Add a record
+# Add a record (identical type/host/value is a no-op; a different value
+# for the same type+host errors — use `dns set` to replace)
 namecheap dns add example.com A @ 1.2.3.4
 
 # Add MX record with priority
@@ -105,6 +112,10 @@ namecheap dns rm example.com A @
 # Remove specific value
 namecheap dns rm example.com A @ 1.2.3.4
 
+# Removing the last record (or any setHosts with zero records) is refused
+# unless you pass --allow-empty. Namecheap setHosts is a full-zone replace.
+namecheap dns rm example.com A @ --allow-empty
+
 # Export records
 namecheap dns export example.com --format json
 namecheap dns export example.com --format zone
@@ -115,7 +126,12 @@ namecheap dns diff example.com records.json
 # Sync records from file
 namecheap dns sync example.com records.json
 namecheap dns sync example.com records.json --delete  # Remove records not in file
+namecheap dns sync example.com empty.json --delete --allow-empty  # Allow a full wipe
 ```
+
+`dns add`, `dns set`, `dns rm`, and `dns sync` all accept `--allow-empty`. Without it, a `setHosts` payload with zero records is refused so a zone cannot be wiped by accident.
+
+Before every `setHosts` call, the current zone is written to a timestamped JSON file under the user cache directory (via the `directories` crate), e.g. `~/.cache/namecheap-cli/backups/<domain>-<utc-millis>.json` on Linux.
 
 ### Presets
 
@@ -243,4 +259,4 @@ For testing, you can use the sandbox API by setting `sandbox = true` in your pro
 
 ## License
 
-MIT
+MIT (same as upstream).

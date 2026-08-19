@@ -166,6 +166,24 @@ fn test_dns_subcommands_help() {
 }
 
 #[test]
+fn test_dns_allow_empty_flag_in_help() {
+    for subcmd in ["add", "set", "rm", "sync"] {
+        let output = namecheap_cmd()
+            .args(["dns", subcmd, "--help"])
+            .output()
+            .expect("Failed to execute command");
+
+        assert!(output.status.success(), "dns {} --help failed", subcmd);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(
+            stdout.contains("--allow-empty"),
+            "dns {} --help should document --allow-empty",
+            subcmd
+        );
+    }
+}
+
+#[test]
 fn test_domains_subcommands_help() {
     let subcommands = ["list", "info", "check"];
 

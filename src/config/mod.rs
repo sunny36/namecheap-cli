@@ -11,6 +11,16 @@ pub fn config_dir() -> Option<PathBuf> {
         .map(|dirs| dirs.config_dir().to_path_buf())
 }
 
+pub fn cache_dir() -> Option<PathBuf> {
+    ProjectDirs::from("com", "namecheap-cli", "namecheap-cli")
+        .map(|dirs| dirs.cache_dir().to_path_buf())
+}
+
+/// Zone backups go under the user cache dir, e.g. `~/.cache/namecheap-cli/backups` on Linux.
+pub fn backup_dir() -> Option<PathBuf> {
+    cache_dir().map(|dir| dir.join("backups"))
+}
+
 pub fn default_config_path() -> Option<PathBuf> {
     config_dir().map(|dir| dir.join("config.toml"))
 }
