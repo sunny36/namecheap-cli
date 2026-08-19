@@ -49,6 +49,10 @@ pub enum DnsSubcommand {
         /// Priority (required for MX records)
         #[arg(long)]
         priority: Option<u16>,
+
+        /// Allow replacing the zone with zero records (Namecheap setHosts is a full-zone replace)
+        #[arg(long)]
+        allow_empty: bool,
     },
 
     /// Set/replace a DNS record
@@ -72,6 +76,10 @@ pub enum DnsSubcommand {
         /// Priority (required for MX records)
         #[arg(long)]
         priority: Option<u16>,
+
+        /// Allow replacing the zone with zero records (Namecheap setHosts is a full-zone replace)
+        #[arg(long)]
+        allow_empty: bool,
     },
 
     /// Remove a DNS record
@@ -87,6 +95,10 @@ pub enum DnsSubcommand {
 
         /// Record value (optional, removes all matching type+host if not specified)
         value: Option<String>,
+
+        /// Allow replacing the zone with zero records (Namecheap setHosts is a full-zone replace)
+        #[arg(long)]
+        allow_empty: bool,
     },
 
     /// Export DNS records
@@ -111,6 +123,10 @@ pub enum DnsSubcommand {
         /// Delete records not in the input
         #[arg(long)]
         delete: bool,
+
+        /// Allow replacing the zone with zero records (Namecheap setHosts is a full-zone replace)
+        #[arg(long)]
+        allow_empty: bool,
     },
 
     /// Show diff between current and desired DNS records
@@ -137,6 +153,7 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
             value,
             ttl,
             priority,
+            allow_empty,
         } => {
             add(
                 &domain,
@@ -145,6 +162,7 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
                 &value,
                 ttl,
                 priority,
+                allow_empty,
                 config,
                 global,
             )
@@ -157,6 +175,7 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
             value,
             ttl,
             priority,
+            allow_empty,
         } => {
             set(
                 &domain,
@@ -165,6 +184,7 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
                 &value,
                 ttl,
                 priority,
+                allow_empty,
                 config,
                 global,
             )
@@ -175,12 +195,14 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
             record_type,
             host,
             value,
+            allow_empty,
         } => {
             rm(
                 &domain,
                 &record_type,
                 &host,
                 value.as_deref(),
+                allow_empty,
                 config,
                 global,
             )
@@ -191,7 +213,8 @@ pub async fn run(cmd: DnsCommand, config: &Config, global: &GlobalOpts) -> Resul
             domain,
             file,
             delete,
-        } => sync(&domain, &file, delete, config, global).await,
+            allow_empty,
+        } => sync(&domain, &file, delete, allow_empty, config, global).await,
         DnsSubcommand::Diff { domain, file } => diff(&domain, &file, config, global).await,
     }
 }
@@ -234,6 +257,7 @@ async fn add(
     value: &str,
     ttl: u32,
     priority: Option<u16>,
+    allow_empty: bool,
     config: &Config,
     global: &GlobalOpts,
 ) -> Result<()> {
@@ -253,19 +277,31 @@ async fn add(
         return Ok(());
     }
 
-    let client = NamecheapClient::new(config)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+    let client = NamecheapClient::new(config).await?;
 
-    client
-        .add_record(domain, record.clone())
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+    let outcome = client
+        .add_record(domain, record.clone(), allow_empty)
+        .await?;
 
-    if is_json(global) {
-        json::print_success_json("Record added successfully");
-    } else if !global.quiet {
-        println!("{} Record added: {}", style("✓").green(), record);
+    match outcome {
+        crate::api::AddRecordResult::Unchanged => {
+            if is_json(global) {
+                json::print_success_json("Record already exists (no change)");
+            } else if !global.quiet {
+                println!(
+                    "{} Record already exists (no change): {}",
+                    style("✓").green(),
+                    record
+                );
+            }
+        }
+        crate::api::AddRecordResult::Added => {
+            if is_json(global) {
+                json::print_success_json("Record added successfully");
+            } else if !global.quiet {
+                println!("{} Record added: {}", style("✓").green(), record);
+            }
+        }
     }
 
     Ok(())
@@ -279,6 +315,7 @@ async fn set(
     value: &str,
     ttl: u32,
     priority: Option<u16>,
+    allow_empty: bool,
     config: &Config,
     global: &GlobalOpts,
 ) -> Result<()> {
@@ -298,27 +335,10 @@ async fn set(
         return Ok(());
     }
 
-    let client = NamecheapClient::new(config)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
-
-    // Get current records
-    let mut records = client
-        .get_hosts(domain)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
-
-    // Remove existing records with same type and host
-    records.retain(|r| !r.matches_key(record_type, host));
-
-    // Add the new record
-    records.push(record.clone());
-
-    // Set all records
+    let client = NamecheapClient::new(config).await?;
     client
-        .set_hosts(domain, &records)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+        .set_record(domain, record.clone(), allow_empty)
+        .await?;
 
     if is_json(global) {
         json::print_success_json("Record set successfully");
@@ -334,6 +354,7 @@ async fn rm(
     record_type: &str,
     host: &str,
     value: Option<&str>,
+    allow_empty: bool,
     config: &Config,
     global: &GlobalOpts,
 ) -> Result<()> {
@@ -358,14 +379,11 @@ async fn rm(
         return Ok(());
     }
 
-    let client = NamecheapClient::new(config)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+    let client = NamecheapClient::new(config).await?;
 
     let removed = client
-        .remove_record(domain, record_type, host, value)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+        .remove_record(domain, record_type, host, value, allow_empty)
+        .await?;
 
     if !removed {
         return Err(CliError::RecordNotFound(format!(
@@ -427,6 +445,7 @@ async fn sync(
     domain: &str,
     file: &str,
     delete: bool,
+    allow_empty: bool,
     config: &Config,
     global: &GlobalOpts,
 ) -> Result<()> {
@@ -480,10 +499,7 @@ async fn sync(
     }
 
     let new_records = apply_diff(&current, &diffs);
-    client
-        .set_hosts(domain, &new_records)
-        .await
-        .map_err(|e| CliError::Api(e.to_string()))?;
+    client.set_hosts(domain, &new_records, allow_empty).await?;
 
     if is_json(global) {
         json::print_success_json("Changes applied successfully");

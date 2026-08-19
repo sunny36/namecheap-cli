@@ -210,7 +210,7 @@ async fn apply(
 
     let new_records = apply_diff(&current, &diffs);
     client
-        .set_hosts(domain, &new_records)
+        .set_hosts(domain, &new_records, false)
         .await
         .map_err(|e| CliError::Api(e.to_string()))?;
 
@@ -316,7 +316,7 @@ async fn remove(
     }
 
     client
-        .set_hosts(domain, &remaining)
+        .set_hosts(domain, &remaining, false)
         .await
         .map_err(|e| CliError::Api(e.to_string()))?;
 

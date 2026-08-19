@@ -14,6 +14,15 @@ pub enum ApiError {
     #[error("Invalid response: {0}")]
     InvalidResponse(String),
 
+    #[error("Refusing empty zone replace: {0}")]
+    EmptyZone(String),
+
+    #[error("{0}")]
+    RecordConflict(String),
+
+    #[error("Failed to write zone backup: {0}")]
+    Backup(String),
+
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
 

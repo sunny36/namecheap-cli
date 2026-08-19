@@ -1,3 +1,4 @@
+use crate::api::ApiError;
 use thiserror::Error;
 
 pub const EXIT_SUCCESS: i32 = 0;
@@ -52,6 +53,21 @@ pub enum CliError {
 
     #[error("{0}")]
     Other(String),
+}
+
+impl From<ApiError> for CliError {
+    fn from(err: ApiError) -> Self {
+        match err {
+            ApiError::Auth(message) => CliError::Auth(message),
+            ApiError::DomainNotFound(message) => CliError::DomainNotFound(message),
+            ApiError::EmptyZone(message) | ApiError::RecordConflict(message) => {
+                CliError::Validation(message)
+            }
+            ApiError::Network(err) => CliError::Network(err),
+            ApiError::Xml(err) => CliError::Xml(err),
+            other => CliError::Api(other.to_string()),
+        }
+    }
 }
 
 impl CliError {
